@@ -4,7 +4,6 @@
 # Output: product_name<TAB>code for matches, then a final count line.
 set -euo pipefail # safer Bash: fail on errors/unset vars/pipelines
 # Allow up to 1 GB per field
-export CSVKIT_FIELD_SIZE_LIMIT=$((1024 * 1024 * 1024))
 INGREDIENT=""; DATA_DIR=""; CSV=""
 usage() {
 echo "Usage: $0 -i \"<ingredient>\" -d /path/to/folder"
@@ -33,7 +32,7 @@ command -v "$cmd" >/dev/null 2>&1 || { echo "ERROR: $cmd not found. Please insta
 done
 # Pipeline:
 tmp_matches="$(mktemp)"
-csvcut -t -c ingredients_text,product_name,code "$tmp_csv" \
+csvcut -t -c ingredients_text,product_name,code "$CSV" \
 | csvgrep -c ingredients_text -r "(?i)${INGREDIENT}" \
 | csvcut -c product_name,code \
 | csvformat -T \
@@ -43,4 +42,4 @@ count="$(wc -l < "$tmp_matches" | tr -d ' ')"
 echo "----"
 echo "Found ${count} product(s) containing: \"${INGREDIENT}\""
 # cleanup
-rm -f "$tmp_csv" "$tmp_matches"
+rm -f "$tmp_matches"
